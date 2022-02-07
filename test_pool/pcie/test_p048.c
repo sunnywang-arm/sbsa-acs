@@ -53,10 +53,10 @@ payload(void)
   uint32_t pe_index;
   uint32_t tbl_index;
   uint32_t read_value, old_value, value;
+  uint32_t status;
   uint32_t test_skip = 1;
   uint64_t mem_base;
   uint64_t mem_lim, new_mem_lim;
-  uint32_t status;
   pcie_device_bdf_table *bdf_tbl_ptr;
 
   tbl_index = 0;
@@ -92,8 +92,7 @@ payload(void)
       bdf = bdf_tbl_ptr->device[tbl_index++].bdf;
       dp_type = val_pcie_device_port_type(bdf);
 
-      if ((dp_type == RP) || (dp_type == iEP_RP))
-      {
+      if ((dp_type == RP) || (dp_type == iEP_RP)) {
         /* Part 1:
          * Check When Address is within the Range of Non-Prefetchable
          * Memory Range.
@@ -124,23 +123,24 @@ payload(void)
         *(volatile uint32_t *)(mem_base + MEM_OFFSET_10) = KNOWN_DATA;
         read_value = (*(volatile uint32_t *)(mem_base + MEM_OFFSET_10));
 
-        /*Accessing out of range of limit should return 0xFFFFFFFF*/
+        //
+        // Accessing out of range of limit should return 0xFFFFFFFF
+        //
         if ((mem_lim >> MEM_SHIFT) > (mem_base >> MEM_SHIFT))
         {
-           new_mem_lim = mem_base + MEM_OFF_100000;
-           mem_base = mem_base | (mem_base  >> 16);
-           val_pcie_write_cfg(bdf, TYPE1_NP_MEM, mem_base);
-           val_pcie_read_cfg(bdf, TYPE1_NP_MEM, &read_value);
 
-           value = (*(volatile uint32_t *)(new_mem_lim + MEM_OFFSET_10));
 
-           /*Write back original value */
-           val_pcie_write_cfg(bdf, TYPE1_NP_MEM, ((mem_lim & MEM_LIM_MASK) | (mem_base  >> 16)));
+           //value = (*(volatile uint32_t *)(new_mem_lim + MEM_OFFSET_10));
+
+           new_mem_lim = mem_lim;
+           val_print (AVS_PRINT_ERR, "\n Read Addr                                 0x%x", mem_lim + 1 + MEM_OFFSET_10);
+           value = (*(volatile uint32_t *)(mem_lim + 1 + MEM_OFFSET_10));
+           val_print (AVS_PRINT_ERR, "\n Value from Read Addr                      0x%x", value);
 
            if (value != PCIE_UNKNOWN_RESPONSE)
            {
                val_print(AVS_PRINT_ERR, "\n Memory range for bdf 0x%x", bdf);
-               val_print(AVS_PRINT_ERR, " is 0x%x", read_value);
+               //val_print(AVS_PRINT_ERR, " is 0x%x", read_value);
                val_print(AVS_PRINT_ERR, "\n Out of range addr %x", (new_mem_lim + MEM_OFFSET_10));
                val_set_status(pe_index, RESULT_FAIL(g_sbsa_level, TEST_NUM, 02));
            }
