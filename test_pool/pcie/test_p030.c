@@ -93,6 +93,9 @@ payload(void)
       else
           val_pcie_get_mmio_bar(bdf, &bar_base);
 
+      val_print(AVS_PRINT_DEBUG, "\n      BDF 0x%x,", bdf);
+      val_print(AVS_PRINT_DEBUG, " bar_base 0x%llx", bar_base);
+
       /* Skip this function if it doesn't have mmio BAR */
       if (!bar_base)
          continue;
@@ -133,7 +136,8 @@ exception_return:
        */
       if (!(IS_TEST_PASS(val_get_status(pe_index)) || (bar_data == PCIE_UNKNOWN_RESPONSE)))
       {
-          val_print(AVS_PRINT_ERR, "\n      BDF %x MSE functionality failure", bdf);
+          val_print(AVS_PRINT_ERR, "\n      BDF 0x%x MSE functionality failure,", bdf);
+          val_print(AVS_PRINT_ERR, " bar_data 0x%x", bar_data);
           test_fails++;
       }
 

@@ -69,7 +69,7 @@ payload(void)
         /* Read Function's Class Code through Pciio Protocol method */
         Status = val_pcie_io_read_cfg(bdf, TYPE01_RIDR, &pciio_proto_cc);
         if (Status == PCIE_NO_MAPPING) {
-          val_print(AVS_PRINT_ERR, "\n       Reading Class code using PciIo protocol failed ", 0);
+          val_print(AVS_PRINT_ERR, "\n       Reading Class code using PciIo protocol failed for bdf 0x%x", bdf);
           val_set_status(pe_index, RESULT_FAIL(g_sbsa_level, TEST_NUM, 01));
           return;
         }

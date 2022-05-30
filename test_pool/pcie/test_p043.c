@@ -43,7 +43,7 @@ payload(void)
   uint32_t sub_bus;
   uint32_t test_fails;
   uint32_t test_skip = 1;
-  uint32_t reg_value;
+  uint32_t reg_value, reg_value1;
   uint32_t status;
   pcie_device_bdf_table *bdf_tbl_ptr;
 
@@ -56,6 +56,11 @@ payload(void)
   for (tbl_index = 0; tbl_index < bdf_tbl_ptr->num_entries; tbl_index++)
   {
       bdf = bdf_tbl_ptr->device[tbl_index].bdf;
+
+      status = val_pcie_read_cfg(bdf, TYPE01_VIDR, &reg_value1); 
+      val_print(AVS_PRINT_DEBUG, "\n    RP bdf 0x%x,", bdf);
+      val_print(AVS_PRINT_DEBUG, " VIDDID 0x%x", reg_value1);
+
       dp_type = val_pcie_device_port_type(bdf);
 
       /* Check entry is Downstream port or RP */
@@ -87,7 +92,8 @@ payload(void)
           {
               test_fails++;
               val_print(AVS_PRINT_ERR, "\n    Dev 0x%x found under", dev_bdf);
-              val_print(AVS_PRINT_ERR, " RP bdf 0x%x", bdf);
+              val_print(AVS_PRINT_ERR, " RP bdf 0x%x,", bdf);
+              val_print(AVS_PRINT_ERR, " reg_value 0x%x", reg_value);
           }
 
           /* Configuration Requests specifying Device Numbers (1-31) must be terminated by the
@@ -101,8 +107,9 @@ payload(void)
               if (reg_value != PCIE_UNKNOWN_RESPONSE)
               {
                   test_fails++;
-                  val_print(AVS_PRINT_ERR, "\n    Dev 0x%x found under", dev_bdf);
-                  val_print(AVS_PRINT_ERR, " RP bdf 0x%x", bdf);
+                  val_print(AVS_PRINT_ERR, "\n    Dev 0x%x found under,", dev_bdf);
+                  val_print(AVS_PRINT_ERR, " RP bdf 0x%x,", bdf);
+                  val_print(AVS_PRINT_ERR, " reg_value 0x%x", reg_value);
               }
           }
       }
